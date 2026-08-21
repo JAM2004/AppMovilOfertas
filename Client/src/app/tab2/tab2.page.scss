@@ -1,0 +1,51 @@
+.chart-card {
+  margin: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--ion-card-background, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chart-title h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.chart {
+  width: 100%;
+  height: 220px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--ion-text-color, #000);
+  opacity: 0.85;
+}
+
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Swatches de la leyenda: mismos tonos que los puntos de la serie. */
+.chart-legend .swatch-down { background: #16a34a; }
+.chart-legend .swatch-up { background: #dc2626; }
+.chart-legend .swatch-flat { background: #94a3b8; }
+
+.chart-legend .marker-line {
+  color: #8a8a8a;
+  font-size: 0.7rem;
+}

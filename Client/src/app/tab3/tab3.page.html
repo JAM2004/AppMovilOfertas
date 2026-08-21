@@ -1,0 +1,61 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Recomendaciones</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Recomendaciones</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Botón para reconstruir el motor (embeddings + ofertas nuevas) -->
+  <div class="ion-padding">
+    <ion-button expand="block" (click)="refresh()" [disabled]="loading">
+      <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+      Refrescar motor de IA
+    </ion-button>
+  </div>
+
+  <!-- Mensaje cuando aún no hay recomendaciones -->
+  <ion-item *ngIf="reason && items.length === 0">
+    <ion-label class="ion-text-center">
+      {{ reason }} Pulsa "Refrescar motor de IA".
+    </ion-label>
+  </ion-item>
+  <ion-item *ngIf="!reason && items.length === 0">
+    <ion-label class="ion-text-center">
+      Aún no hay ofertas guardadas. Pulsa "Refrescar motor de IA".
+    </ion-label>
+  </ion-item>
+
+  <!-- Ofertas rankeadas por similitud con tu "vector de gusto" -->
+  <ion-list>
+    <ion-item *ngFor="let r of items">
+      <ion-thumbnail slot="start">
+        <img [src]="r.image" *ngIf="r.image; else noimg" />
+        <ng-template #noimg>
+          <ion-icon name="image-outline" size="large"></ion-icon>
+        </ng-template>
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ r.title }}</h2>
+        <p>
+          <ion-badge [style.background]="storeConfig[r.store]?.color" [style.color]="'#ffffff'"> {{ storeConfig[r.store]?.label }} </ion-badge>
+          <span *ngIf="r.discount_percent > 0" class="discount">
+            -{{ r.discount_percent }}%
+          </span>
+        </p>
+        <p>
+          <span *ngIf="r.price != null">{{ r.price | currency }}</span>
+          <span *ngIf="r.original_price" class="strike">
+            {{ r.original_price | currency }}
+          </span>
+        </p>
+      </ion-label>
+      <ion-badge slot="end" color="tertiary">{{ scorePct(r.score) }}</ion-badge>
+    </ion-item>
+  </ion-list>
+</ion-content>

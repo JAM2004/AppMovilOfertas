@@ -1,0 +1,97 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+
+// Paleta "AppMovilOfertas" (design system: Accessible & Ethical / emerald).
+// Verde esmeralda = ahorro/oferta; ámbar = descuentos destacados; slate = texto.
+// Fuentes: Rubik para títulos, Nunito Sans para cuerpo (par pareja e-commerce).
+
+:root {
+  --ion-color-primary: #059669;
+  --ion-color-primary-rgb: 5, 150, 105;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #04855c;
+  --ion-color-primary-tint: #1fa879;
+
+  --ion-color-secondary: #10b981;
+  --ion-color-secondary-rgb: 16, 185, 129;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #0ea271;
+  --ion-color-secondary-tint: #2cc28d;
+
+  --ion-color-tertiary: #d97706;
+  --ion-color-tertiary-rgb: 217, 119, 6;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #bf6a05;
+  --ion-color-tertiary-tint: #dd8a20;
+
+  --ion-color-success: #16a34a;
+  --ion-color-success-rgb: 22, 163, 74;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #149241;
+  --ion-color-success-tint: #2daf5c;
+
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #0f172a;
+  --ion-color-warning-contrast-rgb: 15, 23, 42;
+  --ion-color-warning-shade: #d78e0a;
+  --ion-color-warning-tint: #f6ab29;
+
+  --ion-color-danger: #dc2626;
+  --ion-color-danger-rgb: 220, 38, 38;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #c22222;
+  --ion-color-danger-tint: #e03b3b;
+
+  --ion-color-medium: #64748b;
+  --ion-color-medium-rgb: 100, 116, 139;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #59667a;
+  --ion-color-medium-tint: #74839a;
+
+  --ion-color-light: #f0f8f6;
+  --ion-color-light-rgb: 240, 248, 246;
+  --ion-color-light-contrast: #0f172a;
+  --ion-color-light-contrast-rgb: 15, 23, 42;
+  --ion-color-light-shade: #d3dbd9;
+  --ion-color-light-tint: #f2f9f7;
+
+  --ion-color-dark: #0f172a;
+  --ion-color-dark-rgb: 15, 23, 42;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #0d1426;
+  --ion-color-dark-tint: #272e3f;
+
+  /* Fondo/foreground generales (light) */
+  --ion-background-color: #f8fbf9;
+  --ion-background-color-rgb: 248, 251, 249;
+  --ion-text-color: #0f172a;
+  --ion-text-color-rgb: 15, 23, 42;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #f8fbf9;
+  --ion-tab-bar-background: #ffffff;
+
+  --ion-font-family: "Nunito Sans", system-ui, -apple-system, sans-serif;
+}
+
+/* Dark mode: mismas tintas esmeralda, fondos slate profundos. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #0b1220;
+    --ion-background-color-rgb: 11, 18, 32;
+    --ion-text-color: #e2e8f0;
+    --ion-text-color-rgb: 226, 232, 240;
+    --ion-item-background: #131c2e;
+    --ion-card-background: #131c2e;
+    --ion-toolbar-background: #0b1220;
+    --ion-tab-bar-background: #131c2e;
+  }
+}

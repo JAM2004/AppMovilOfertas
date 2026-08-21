@@ -1,0 +1,35 @@
+# AppMovilOfertas
+
+# Node
+node_modules/
+
+# --- Server: secretos y datos locales ---
+Server/.env
+Server/.env.*
+Server/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de scratch del server
+Server/_ctx.txt
+Server/_probe_deals.mjs
+Server/_test_deals.mjs
+
+# --- Client: builds y dependencias ---
+Client/node_modules/
+Client/dist/
+Client/www/
+Client/.angular/
+
+# --- Capacitor nativo (opcional según flujo de build) ---
+# Client/android/
+# Client/ios/
+
+# IDE / OS
+.idea/
+.vscode/
+.angular/
+*.log
+.DS_Store
+Thumbs.db

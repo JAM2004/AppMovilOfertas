@@ -1,0 +1,122 @@
+﻿<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Estadísticas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Estadísticas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Selector de producto: cualquiera con historial de precios monitoreado. -->
+  <ion-item>
+    <ion-label>Producto</ion-label>
+    <ion-select
+      [(ngModel)]="selectedId"
+      (ionChange)="selectProduct($event.detail.value)"
+      interface="action-sheet"
+    >
+      <ion-select-option
+        *ngFor="let p of products"
+        [value]="p.id"
+      >{{ p.title }}</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Gráfica de precio desde que se agregó el producto. -->
+  <div class="chart-card" *ngIf="hasData && detail">
+    <div class="chart-title">
+      <h2>{{ detail.title }}</h2>
+      <p>
+        <ion-badge [color]="summaryColor()">{{ summaryText() }}</ion-badge>
+      </p>
+    </div>
+
+    <svg [attr.viewBox]="viewBox" class="chart" preserveAspectRatio="none">
+      <!-- Rejilla horizontal de precios -->
+      <ng-container *ngFor="let g of gridH">
+        <line [attr.x1]="padL" [attr.x2]="chartW - padR" [attr.y1]="g.y" [attr.y2]="g.y" stroke="rgba(125,125,125,0.22)" stroke-dasharray="3 3" />
+        <text [attr.x]="padL - 4" [attr.y]="g.y + 3" text-anchor="end" font-size="9" fill="#8a8a8a">{{ g.value }}</text>
+      </ng-container>
+
+      <!-- Rejilla vertical de fechas -->
+      <ng-container *ngFor="let g of gridV">
+        <line [attr.x1]="g.x" [attr.x2]="g.x" [attr.y1]="padT" [attr.y2]="chartH - padB" stroke="rgba(125,125,125,0.15)" stroke-dasharray="3 3" />
+        <text [attr.x]="g.x" [attr.y]="chartH - padB + 14" text-anchor="middle" font-size="9" fill="#8a8a8a">{{ g.value }}</text>
+      </ng-container>
+
+      <!-- Relleno y línea de la serie de precios -->
+      <polygon [attr.points]="areaPoints" fill="rgba(5,150,105,0.15)" />
+      <polyline
+        [attr.points]="linePoints"
+        fill="none"
+        stroke="#059669"
+        stroke-width="2"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+      />
+
+      <!-- Eventos de precio (reutiliza las notificaciones del cambio) -->
+      <ng-container *ngFor="let m of markers">
+        <line [attr.x1]="m.x" [attr.x2]="m.x" [attr.y1]="padT" [attr.y2]="chartH - padB" [attr.stroke]="m.color" stroke-width="1.5" stroke-dasharray="4 2" />
+        <text [attr.x]="m.x" [attr.y]="padT + 9" text-anchor="middle" font-size="8" [attr.fill]="m.color">{{ m.label }}</text>
+      </ng-container>
+
+      <!-- Puntos: verde si bajó, rojo si subió, gris si quedó igual -->
+      <circle
+        *ngFor="let d of dots"
+        [attr.cx]="d.x"
+        [attr.cy]="d.y"
+        r="3"
+        [attr.fill]="d.color"
+        stroke="#fff"
+        stroke-width="0.8"
+      >
+        <title>{{ d.title }}</title>
+      </circle>
+    </svg>
+
+    <div class="chart-legend">
+      <span><i class="swatch swatch-down"></i> bajó</span>
+      <span><i class="swatch swatch-up"></i> subió</span>
+      <span><i class="swatch swatch-flat"></i> igual</span>
+      <span class="marker-line">│ evento (bajada/descuento/objetivo)</span>
+    </div>
+  </div>
+
+  <!-- Sin historial suficiente para graficar. -->
+  <div class="chart-card" *ngIf="!hasData && !loading && products.length > 0">
+    <ion-label class="ion-text-center">
+      <p>Este producto aún no tiene historial de precios suficiente.</p>
+      <p>Se llena cuando el monitor re-raspea su precio (cada 30 min).</p>
+    </ion-label>
+  </div>
+
+  <!-- Sin productos registrados. -->
+  <div class="chart-card" *ngIf="products.length === 0 && !loading">
+    <ion-label class="ion-text-center">
+      <p>Registra un producto en la pestaña "Lo quiero" para ver sus estadísticas.</p>
+    </ion-label>
+  </div>
+
+  <!-- Historial de eventos de precio del producto (mismos que la pestaña Notificaciones). -->
+  <ion-list *ngIf="notes.length > 0">
+    <ion-list-header>
+      <ion-label>Cambios de precio detectados</ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let n of notes">
+      <ion-icon
+        slot="start"
+        [name]="iconFor(n.kind)"
+        [color]="colorFor(n.kind)"
+      ></ion-icon>
+      <ion-label>
+        <h2>{{ n.message }}</h2>
+        <p>{{ n.created_at }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

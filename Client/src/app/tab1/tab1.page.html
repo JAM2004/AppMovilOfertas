@@ -1,0 +1,67 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Lo quiero</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Lo quiero</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Formulario para registrar un producto pegando su link -->
+  <ion-list inset>
+    <ion-item>
+      <ion-input label="Link del producto" labelPlacement="stacked" [(ngModel)]="url"></ion-input>
+      <ion-button color="dark" size="small" (click)="addProduct()" [disabled]="!url || url.length === 0" fill="clear"
+        slot="end">
+        <ion-spinner *ngIf="loading" name="crescent" color="dark"></ion-spinner>
+        <ion-icon *ngIf="!loading" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Lista de productos que estás monitoreando -->
+  <ion-list>
+    <ion-item *ngFor="let p of products">
+      <ion-thumbnail slot="start">
+        <img [src]="p.image" *ngIf="p.image; else noimg" />
+        <ng-template #noimg>
+          <ion-icon name="image-outline" size="large"></ion-icon>
+        </ng-template>
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ p.title }}</h2>
+        <p>
+          <ion-badge [style.background]="storeConfig[p.store]?.color" [style.color]="'#ffffff'"> {{ storeConfig[p.store]?.label }} </ion-badge>
+          <span *ngIf="p.discount_percent > 0" class="discount">
+            -{{ p.discount_percent }}%
+          </span>
+        </p>
+        <p>
+          <span *ngIf="p.price != null">
+            {{ p.price | currency: (p.currency ?? 'MXN') }}
+          </span>
+          <span *ngIf="p.original_price" class="strike">
+            {{ p.original_price | currency: (p.currency ?? 'MXN') }}
+          </span>
+          <span *ngIf="p.target_price != null" class="target">
+            Objetivo: {{ p.target_price | currency: (p.currency ?? 'MXN') }}
+          </span>
+        </p>
+      </ion-label>
+      <ion-button slot="end" fill="clear" size="small" color="danger" (click)="remove(p)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <ion-item *ngIf="products.length === 0">
+      <ion-label class="ion-text-center">
+        Agrega el link de un producto de Amazon o Steam para empezar a
+        monitorearlo
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
