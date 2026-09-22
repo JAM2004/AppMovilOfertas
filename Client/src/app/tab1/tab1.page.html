@@ -47,9 +47,6 @@
           <span *ngIf="p.original_price" class="strike">
             {{ p.original_price | currency: (p.currency ?? 'MXN') }}
           </span>
-          <span *ngIf="p.target_price != null" class="target">
-            Objetivo: {{ p.target_price | currency: (p.currency ?? 'MXN') }}
-          </span>
         </p>
       </ion-label>
       <ion-button slot="end" fill="clear" size="small" color="danger" (click)="remove(p)">

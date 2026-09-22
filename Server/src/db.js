@@ -24,7 +24,6 @@ db.exec(`
     discount_percent INTEGER DEFAULT 0,
     currency TEXT,
     status TEXT NOT NULL DEFAULT 'want',
-    target_price REAL,
     embedding TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -80,11 +79,23 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_price_history_product ON price_history(product_id);
 `);
 
-export function upsertProduct({ store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency, status, targetPrice }) {
+// Migración ligera: en BDs creadas antes se guardaba `target_price`
+// (función eliminada). Si la columna aún existe, se quita para dejar el
+// esquema limpio. Se envuelve en try/catch por compatibilidad.
+try {
+  const cols = db.prepare(`PRAGMA table_info(products)`).all();
+  if (cols.some((c) => c.name === "target_price")) {
+    db.exec(`ALTER TABLE products DROP COLUMN target_price`);
+  }
+} catch {
+  // SQLite antiguo sin DROP COLUMN o BD sin la tabla: se ignora.
+}
+
+export function upsertProduct({ store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency, status }) {
   const row = db.prepare(`
     INSERT INTO products
-      (store, store_product_id, url, title, image, price, original_price, discount_percent, currency, status, target_price)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (store, store_product_id, url, title, image, price, original_price, discount_percent, currency, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(store, store_product_id) DO UPDATE SET
       url = excluded.url,
       title = excluded.title,
@@ -95,7 +106,7 @@ export function upsertProduct({ store, storeProductId, url, title, image, price,
       currency = excluded.currency,
       updated_at = datetime('now')
     RETURNING *
-  `).get(store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency, status, targetPrice);
+  `).get(store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency, status);
   return row;
 }
 
@@ -115,7 +126,7 @@ export function getProductByStoreRef(store, storeProductId) {
 }
 
 export function updateProduct(id, fields) {
-  const allowed = ["status", "target_price"];
+  const allowed = ["status"];
   const provided = Object.entries(fields).filter(
     ([k, v]) => allowed.includes(k) && v !== undefined
   );
@@ -145,7 +156,7 @@ export function getLastPrice(productId) {
   return db.prepare(`SELECT price FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT 1`).get(productId);
 }
 
-// El monitor (Fase 2) refresca los precios sin tocar status ni target_price,
+// El monitor (Fase 2) refresca los precios sin tocar el status,
 // por eso necesita un update propio que solo toca las columnas de precio.
 export function updateProductPrices(id, { price, originalPrice, discountPercent }) {
   db.prepare(`

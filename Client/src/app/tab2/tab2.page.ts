@@ -222,7 +222,6 @@ export class Tab2Page {
     switch (kind) {
       case 'price_drop': return DOWN; // bajada de precio
       case 'discount': return '#D97706'; // ámbar: descuento
-      case 'target_hit': return '#475569'; // slate: precio objetivo
       default: return GRID;
     }
   }
@@ -231,7 +230,6 @@ export class Tab2Page {
     switch (kind) {
       case 'price_drop': return 'bajada';
       case 'discount': return 'descuento';
-      case 'target_hit': return 'objetivo';
       default: return 'evento';
     }
   }
@@ -241,7 +239,6 @@ export class Tab2Page {
     switch (kind) {
       case 'price_drop': return 'trending-down';
       case 'discount': return 'pricetag';
-      case 'target_hit': return 'flag';
       default: return 'notifications';
     }
   }
@@ -250,7 +247,6 @@ export class Tab2Page {
     switch (kind) {
       case 'price_drop': return 'success';
       case 'discount': return 'warning';
-      case 'target_hit': return 'primary';
       default: return 'medium';
     }
   }

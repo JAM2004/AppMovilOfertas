@@ -47,7 +47,7 @@ export class Tab3Page {
   }
 
   // Refresca el motor: embebe tus productos y trae ofertas nuevas. Puede
-  // tardar unos segundos porque llama a la API de OpenAI.
+  // tardar unos segundos porque llama a Ollama local (bge-m3).
   async refresh() {
     this.loading = true;
     try {

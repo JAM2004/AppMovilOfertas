@@ -22,7 +22,6 @@ function fmt(price, currency) {
 // ANTERIOR ya guardado (historial + fila del producto), no contra nada fijo:
 //   - "bajó de precio"  → solo si el nuevo precio es MENOR que el último.
 //   - "en oferta %"     → solo si pasó de no tener descuento a tenerlo.
-//   - "objetivo"        → solo si CRUZA por debajo del precio objetivo.
 // Así cada evento distinto notifica una vez, y no se repite mientras todo
 // se mantiene igual entre ejecuciones del cron.
 async function checkProduct(product) {
@@ -40,7 +39,6 @@ async function checkProduct(product) {
   const lastPrice = last?.price;
   const oldDiscount = product.discount_percent || 0;
   const newDiscount = fresh.discountPercent || 0;
-  const target = product.target_price;
 
   // Guarda el estado nuevo ANTES de evaluar, para que la siguiente ejecución
   // del cron compare contra este y no vuelva a avisar lo mismo.
@@ -68,20 +66,6 @@ async function checkProduct(product) {
     alerts.push({
       kind: "discount",
       message: `"${product.title}" está en oferta con ${newDiscount}% de descuento (${fmt(newPrice, fresh.currency)})`,
-    });
-  }
-
-  // 3) Alcanzó el precio objetivo: cruza por debajo de target_price.
-  // El cruce se detecta porque el precio anterior estaba por ENCIMA del objetivo.
-  if (
-    target != null &&
-    newPrice != null &&
-    newPrice <= target &&
-    (lastPrice == null || lastPrice > target)
-  ) {
-    alerts.push({
-      kind: "target_hit",
-      message: `"${product.title}" alcanzó tu precio objetivo: ${fmt(newPrice, fresh.currency)} ≤ ${fmt(target, fresh.currency)}`,
     });
   }
 

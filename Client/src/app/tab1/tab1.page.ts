@@ -12,9 +12,8 @@ import { Product } from '../models/product';
 })
 export class Tab1Page {
   products: Product[] = [];
-  // El input de ngModel devuelve strings; el número se parsea al enviar.
+  // El input de ngModel devuelve strings.
   url = '';
-  targetPrice = '';
   loading = false;
 
 storeConfig: Record<string, {
@@ -57,14 +56,9 @@ storeConfig: Record<string, {
       // El servidor raspea el link (Amazon/Steam) y guarda el producto.
       // firstValueFrom convierte el Observable en un await manejable.
       await firstValueFrom(
-        this.api.registerProduct(
-          this.url.trim(),
-          'want',
-          this.targetPrice ? Number(this.targetPrice) : undefined
-        )
+        this.api.registerProduct(this.url.trim(), 'want')
       );
       this.url = '';
-      this.targetPrice = '';
       this.load();
     } catch (err) {
       // El servidor responde { error: "..." } (ej: link no soportado,

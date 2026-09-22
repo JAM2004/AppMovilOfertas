@@ -29,8 +29,6 @@ export class Tab4Page {
         return 'trending-down';
       case 'discount':
         return 'pricetag';
-      case 'target_hit':
-        return 'flag';
       case 'recommendation':
         return 'sparkles';
       default:
@@ -44,8 +42,6 @@ export class Tab4Page {
         return 'success';
       case 'discount':
         return 'warning';
-      case 'target_hit':
-        return 'primary';
       case 'recommendation':
         return 'tertiary';
       default:

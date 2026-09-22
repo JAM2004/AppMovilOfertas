@@ -1,9 +1,9 @@
 # AppMovilOfertas — Monitoreo de ofertas (Angular + Ionic + Node)
 
 App **personal** para monitorear ofertas de tiendas online (Amazon, Steam) y
-recibir alertas cuando un producto marcado como **"Lo quiero"** baja de precio,
-entra en descuento o alcanza su **precio objetivo**. Incluye un motor de
-**recomendaciones** con embeddings locales (Ollama + `bge-m3`).
+recibir alertas cuando un producto marcado como **"Lo quiero"** baja de precio
+o entra en descuento. Incluye un motor de **recomendaciones** con embeddings
+locales (Ollama + `bge-m3`).
 
 > ⚠️ **Proyecto personal, no comercial**: el scraping usa cookies de sesión
 > reales y una frecuencia baja para no ser bloqueado. No la publiques con tus
@@ -21,18 +21,19 @@ entra en descuento o alcanza su **precio objetivo**. Incluye un motor de
 ```
 Client/               # App móvil (Angular/Ionic/Capacitor)
   src/app/
-    tab1  "Lo quiero"    # registro por link + lista con precio
-    tab2  "Estadísticas" # gráfica SVG de precio por producto
-    tab3  "Recomendaciones"
-    tab4  "Notificaciones"
-    tab5  "Ajustes"      # renueva cookie de sesión por tienda (Amazon)
+    tab1  "Lo quiero"       # registro por link + lista con precio
+    tab2  "Estadísticas"    # gráfica SVG de precio por producto
+    tab3  "Recomendaciones" # ofertas rankeadas + botón de refresco
+    tab4  "Notificaciones"  # historial de alertas
+    tab5  "Ajustes"         # renueva cookie de sesión por tienda (Amazon)
 Server/               # API REST + monitor
   server.js             # entry (puerto :3000)
   src/app.js            # express, CORS, rutas
   src/db.js             # node:sqlite: esquema + CRUD
   src/monitor.js        # cron de monitoreo de precios (Fase 2)
   src/recommender.js    # recomendaciones con embeddings (Fase 4)
-  src/routes/           # REST de productos/ofrecimientos/settings
+  src/embeddings.js     # wrapper Ollama/bge-m3
+  src/routes/           # REST de productos/recomendaciones/settings
   src/stores/           # extractores: parser.js, steam.js, amazon.js
 ```
 
@@ -56,7 +57,7 @@ npm install
 npm run dev        # (o npm start) → http://localhost:3000
 ```
 
-Variables del server (`.env` o configúralas en la app por tienda):
+Variables del server (`.env`, nunca se sube al repo):
 
 | Variable        | Descripción                                     |
 |-----------------|-------------------------------------------------|
@@ -64,6 +65,8 @@ Variables del server (`.env` o configúralas en la app por tienda):
 | `STEAM_CC`      | Código de moneda regional (ej. MX)              |
 | `STEAM_LANG`    | Idioma de Steam (ej. es)                        |
 | `AMAZON_COOKIE` | Cookie de sesión de Amazon (renovable desde la app) |
+| `MONITOR_CRON` / `MONITOR_ENABLED` / `MONITOR_DELAY_MS` | Config del cron de monitoreo |
+| `OLLAMA_URL` / `EMBED_MODEL` | URL de Ollama y modelo de embeddings |
 
 Client:
 
@@ -78,8 +81,8 @@ IP local del PC, ej. `http://192.168.1.10:3000`.
 
 ## API (resumen)
 
-- `POST /api/products` `{ url, status, targetPrice? }` — registra desde link (Steam/Amazon)
-- `GET /api/products?status=` · `GET /api/products/:id` · `PATCH /api/products/:id` · `DELETE /api/products/:id`
+- `POST /api/products` `{ url, status }` — registra desde link (Steam/Amazon)
+- `GET /api/products?status=` · `GET /api/products/:id` · `PATCH /api/products/:id { status? }` · `DELETE /api/products/:id`
 - `POST /api/device-token` — token de push (para FCM, pendiente)
 - `GET /api/notifications` — historial de alertas
 - `GET /api/offers` · `POST /api/recommendations/refresh` · `GET /api/recommendations`
@@ -89,8 +92,12 @@ IP local del PC, ej. `http://192.168.1.10:3000`.
 
 - ✅ Fase 1: registro de productos por link (Steam + Amazon)
 - ✅ Fase 2: monitoreo de precios por cron con dedupe de alertas
+  (bajada de precio y % de descuento)
 - ✅ Fase 4 (backend + UI): recomendaciones por embeddings locales
 - ⏳ Fase 5: notificaciones push (FCM) — pendiente
-- ⏳ Fase 6: pestaña Recomendaciones con resultados reales
+- ⏳ Fase 0/1/2 (pulido): design system, estados de carga/vacío y
+  config de dispositivo real (`capacitor.config.ts` aún con valores del
+  starter, `apiUrl` en localhost)
 
-Más detalle técnico en [`CONTEXT.md`](CONTEXT.md) (handoff del proyecto).
+> Nota: este README es la referencia del estado actual. El handoff detallado
+> para IAs vive en `AGENTS.md` (archivo local, no se sube al repo).
