@@ -1,6 +1,10 @@
 # AppMovilOfertas
 
-CONTEXT.md
+# Configuración y herramientas locales
+.agents/
+AGENTS.md
+skills-lock.json
+
 # Node
 node_modules/
 
