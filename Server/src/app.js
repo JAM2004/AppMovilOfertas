@@ -14,10 +14,9 @@ app.get("/", (req, res) => {
   res.json({
     name: "AppMovilOfertas API",
     endpoints: {
-      "POST /api/products": "Registrar producto por link (body: url, status)",
-      "GET /api/products": "Listar productos (?status=want|bought)",
+      "POST /api/products": "Registrar producto por link (body: url)",
+      "GET /api/products": "Listar productos",
       "GET /api/products/:id": "Detalle con historial de precios",
-      "PATCH /api/products/:id": "Actualizar status",
       "DELETE /api/products/:id": "Eliminar producto",
       "POST /api/device-token": "Registrar token de push (body: token)",
       "GET /api/notifications": "Historial de notificaciones",

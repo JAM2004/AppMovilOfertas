@@ -21,26 +21,17 @@ export class ApiService {
 
   // Registra un producto a partir del link compartido; el servidor detecta la
   // tienda y raspea título/precio/descuento.
-  registerProduct(url: string, status: 'want' | 'bought'): Observable<Product> {
-    return this.http.post<Product>(`${this.base}/api/products`, { url, status });
+  registerProduct(url: string): Observable<Product> {
+    return this.http.post<Product>(`${this.base}/api/products`, { url, });
   }
 
-  getProducts(status?: 'want' | 'bought'): Observable<Product[]> {
-    const params = status ? `?status=${status}` : '';
-    return this.http.get<Product[]>(`${this.base}/api/products${params}`);
+  getProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.base}/api/products`);
   }
 
   // Detalle de un producto + su historial de precios (para la gráfica).
   getProductDetail(id: number): Observable<ProductDetail> {
     return this.http.get<ProductDetail>(`${this.base}/api/products/${id}`);
-  }
-
-  // Cambia el status (want <-> bought).
-  updateProduct(
-    id: number,
-    changes: { status?: 'want' | 'bought' }
-  ): Observable<Product> {
-    return this.http.patch<Product>(`${this.base}/api/products/${id}`, changes);
   }
 
   deleteProduct(id: number): Observable<void> {

@@ -46,7 +46,7 @@ storeConfig: Record<string, {
   }
 
   load() {
-    this.api.getProducts('want').subscribe((p) => (this.products = p));
+    this.api.getProducts().subscribe((p) => (this.products = p));
   }
 
   async addProduct() {
@@ -56,7 +56,7 @@ storeConfig: Record<string, {
       // El servidor raspea el link (Amazon/Steam) y guarda el producto.
       // firstValueFrom convierte el Observable en un await manejable.
       await firstValueFrom(
-        this.api.registerProduct(this.url.trim(), 'want')
+        this.api.registerProduct(this.url.trim())
       );
       this.url = '';
       this.load();

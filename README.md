@@ -81,8 +81,8 @@ IP local del PC, ej. `http://192.168.1.10:3000`.
 
 ## API (resumen)
 
-- `POST /api/products` `{ url, status }` — registra desde link (Steam/Amazon)
-- `GET /api/products?status=` · `GET /api/products/:id` · `PATCH /api/products/:id { status? }` · `DELETE /api/products/:id`
+- `POST /api/products` `{ url }` — registra desde link (Steam/Amazon)
+- `GET /api/products` · `GET /api/products/:id` · `DELETE /api/products/:id`
 - `POST /api/device-token` — token de push (para FCM, pendiente)
 - `GET /api/notifications` — historial de alertas
 - `GET /api/offers` · `POST /api/recommendations/refresh` · `GET /api/recommendations`
@@ -99,5 +99,4 @@ IP local del PC, ej. `http://192.168.1.10:3000`.
   config de dispositivo real (`capacitor.config.ts` aún con valores del
   starter, `apiUrl` en localhost)
 
-> Nota: este README es la referencia del estado actual. El handoff detallado
-> para IAs vive en `AGENTS.md` (archivo local, no se sube al repo).
+> Nota: este README es la referencia del estado actual..

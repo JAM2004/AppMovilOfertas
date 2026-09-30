@@ -23,7 +23,6 @@ db.exec(`
     original_price REAL,
     discount_percent INTEGER DEFAULT 0,
     currency TEXT,
-    status TEXT NOT NULL DEFAULT 'want',
     embedding TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -75,7 +74,6 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
-  CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
   CREATE INDEX IF NOT EXISTS idx_price_history_product ON price_history(product_id);
 `);
 
@@ -91,11 +89,21 @@ try {
   // SQLite antiguo sin DROP COLUMN o BD sin la tabla: se ignora.
 }
 
-export function upsertProduct({ store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency, status }) {
+try {
+  const cols = db.prepare(`PRAGMA table_info(products)`).all();
+  if (cols.some((c) => c.name === "status")) {
+    db.exec(`DROP INDEX IF EXISTS idx_products_status`)
+    db.exec(`ALTER TABLE products DROP COLUMN status`);
+  }
+} catch {
+  // SQLite antiguo sin DROP COLUMN o BD sin la tabla: se ignora.
+}
+
+export function upsertProduct({ store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency }) {
   const row = db.prepare(`
     INSERT INTO products
-      (store, store_product_id, url, title, image, price, original_price, discount_percent, currency, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (store, store_product_id, url, title, image, price, original_price, discount_percent, currency)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(store, store_product_id) DO UPDATE SET
       url = excluded.url,
       title = excluded.title,
@@ -106,14 +114,11 @@ export function upsertProduct({ store, storeProductId, url, title, image, price,
       currency = excluded.currency,
       updated_at = datetime('now')
     RETURNING *
-  `).get(store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency, status);
+  `).get(store, storeProductId, url, title, image, price, originalPrice, discountPercent, currency);
   return row;
 }
 
-export function listProducts(status) {
-  if (status) {
-    return db.prepare(`SELECT * FROM products WHERE status = ? ORDER BY created_at DESC`).all(status);
-  }
+export function listProducts() {
   return db.prepare(`SELECT * FROM products ORDER BY created_at DESC`).all();
 }
 
@@ -125,17 +130,6 @@ export function getProductByStoreRef(store, storeProductId) {
   return db.prepare(`SELECT * FROM products WHERE store = ? AND store_product_id = ?`).get(store, storeProductId);
 }
 
-export function updateProduct(id, fields) {
-  const allowed = ["status"];
-  const provided = Object.entries(fields).filter(
-    ([k, v]) => allowed.includes(k) && v !== undefined
-  );
-  if (provided.length === 0) return getProduct(id);
-  const set = provided.map(([k]) => `${k} = ?`).join(", ");
-  const values = provided.map(([, v]) => v);
-  db.prepare(`UPDATE products SET ${set}, updated_at = datetime('now') WHERE id = ?`).run(...values, id);
-  return getProduct(id);
-}
 
 export function deleteProduct(id) {
   const info = db.prepare(`DELETE FROM products WHERE id = ?`).run(id);
@@ -156,8 +150,6 @@ export function getLastPrice(productId) {
   return db.prepare(`SELECT price FROM price_history WHERE product_id = ? ORDER BY checked_at DESC LIMIT 1`).get(productId);
 }
 
-// El monitor (Fase 2) refresca los precios sin tocar el status,
-// por eso necesita un update propio que solo toca las columnas de precio.
 export function updateProductPrices(id, { price, originalPrice, discountPercent }) {
   db.prepare(`
     UPDATE products

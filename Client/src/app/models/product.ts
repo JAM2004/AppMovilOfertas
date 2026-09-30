@@ -12,7 +12,6 @@ export interface Product {
   original_price: number | null;
   discount_percent: number;
   currency: string | null;
-  status: 'want' | 'bought';
   created_at: string;
   updated_at: string;
 }

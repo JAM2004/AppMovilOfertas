@@ -91,7 +91,7 @@ export class Tab2Page {
   }
 
   async loadProducts() {
-    // Cargamos todos los productos (want y bought): cualquiera puede tener
+    // Cargamos todos los productos (want ): cualquiera puede tener
     // historial de precios si estuvo en monitoreo.
     this.products = await firstValueFrom(this.api.getProducts());
     if (!this.selectedId && this.products.length > 0) {

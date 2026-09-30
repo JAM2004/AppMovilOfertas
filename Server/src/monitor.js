@@ -79,7 +79,7 @@ async function checkProduct(product) {
 // Barre todos los productos "Lo quiero". El delay entre productos evita
 // disparar ráfagas de peticiones a Amazon (acuerdo de baja frecuencia).
 export async function runMonitoring() {
-  const products = listProducts("want");
+  const products = listProducts();
   console.log(`[monitor] revisando ${products.length} productos...`);
   const delayMs = Number(process.env.MONITOR_DELAY_MS || 3000);
   let notified = 0;

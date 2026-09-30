@@ -4,7 +4,6 @@ import {
   upsertProduct,
   listProducts,
   getProduct,
-  updateProduct,
   deleteProduct,
   addPricePoint,
   getPriceHistory,
@@ -13,18 +12,15 @@ import {
 export const productsRouter = Router();
 
 productsRouter.post("/", async (req, res) => {
-  const { url, status = "want" } = req.body ?? {};
+  const { url } = req.body ?? {};
   if (!url || typeof url !== "string") {
     return res.status(400).json({ error: "Falta el campo url" });
   }
-  if (!["want", "bought"].includes(status)) {
-    return res.status(400).json({ error: 'status debe ser "want" o "bought"' });
-  }
+
   try {
     const product = await resolveProduct(url);
     const row = upsertProduct({
       ...product,
-      status,
     });
     addPricePoint(row.id, row.price);
     res.status(201).json(row);
@@ -34,24 +30,13 @@ productsRouter.post("/", async (req, res) => {
 });
 
 productsRouter.get("/", (req, res) => {
-  const { status } = req.query;
-  res.json(listProducts(status));
+  res.json(listProducts());
 });
 
 productsRouter.get("/:id", (req, res) => {
   const row = getProduct(Number(req.params.id));
   if (!row) return res.status(404).json({ error: "Producto no encontrado" });
   res.json({ ...row, history: getPriceHistory(row.id) });
-});
-
-productsRouter.patch("/:id", (req, res) => {
-  const { status } = req.body ?? {};
-  const existing = getProduct(Number(req.params.id));
-  if (!existing) return res.status(404).json({ error: "Producto no encontrado" });
-  const row = updateProduct(Number(req.params.id), {
-    status,
-  });
-  res.json(row);
 });
 
 productsRouter.delete("/:id", (req, res) => {
