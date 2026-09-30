@@ -84,7 +84,7 @@ export class Tab2Page {
   // Resumen del periodo: primer vs último precio y su variación.
   summary = { first: 0, last: 0, pct: 0, dir: 'flat' as 'up' | 'down' | 'flat' };
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   ionViewWillEnter() {
     this.loadProducts();
@@ -261,6 +261,16 @@ export class Tab2Page {
 
   summaryColor(): string {
     return this.summary.dir === 'down' ? 'success' : this.summary.dir === 'up' ? 'danger' : 'medium';
+  }
+
+  fmtNoteDate(iso: string): string {
+    const d = new Date(iso.replace(' ', 'T') + 'Z');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   }
 
   fmtDate(d: Date | string): string {

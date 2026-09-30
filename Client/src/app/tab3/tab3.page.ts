@@ -38,11 +38,21 @@ export class Tab3Page {
   ionViewWillEnter() {
     this.load();
   }
-
+loadError: string | null = null;
+  loadingList = true; // true inicial: el primer pintado ya muestra "cargando", no "vacío"
   load() {
-    this.api.getRecommendations(20).subscribe((res) => {
-      this.items = res.items;
-      this.reason = res.reason;
+    this.loadError = null;
+    this.loadingList = true;
+    this.api.getRecommendations(20).subscribe({
+      next: (res) => {
+        this.items = res.items;
+        this.reason = res.reason;
+        this.loadingList = false;
+      },
+      error: () => {
+        this.loadError = 'No se pudo conectar con el servidor';
+        this.loadingList = false;
+      }
     });
   }
 

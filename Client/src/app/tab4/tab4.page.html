@@ -11,21 +11,30 @@
     </ion-toolbar>
   </ion-header>
 
+  <ion-item *ngIf="loadingList">
+    <ion-spinner slot="start" name="crescent"></ion-spinner>
+    <ion-label>Cargando notificaciones...</ion-label>
+  </ion-item>
+
+  <ion-item *ngIf="loadError">
+    <ion-icon slot="start" name="cloud-offline-outline" color="danger"></ion-icon>
+    <ion-label>
+      <h2>{{ loadError }}</h2>
+      <p>Revisa que el servidor esté encendido.</p>
+    </ion-label>
+    <ion-button slot="end" fill="clear" (click)="load()">Reintentar</ion-button>
+  </ion-item>
+
   <ion-list>
     <ion-item *ngFor="let n of notifications">
-      <ion-icon
-        slot="start"
-        size="medium"
-        [name]="iconFor(n.kind)"
-        [color]="colorFor(n.kind)"
-      ></ion-icon>
+      <ion-icon slot="start" size="medium" [name]="iconFor(n.kind)" [color]="colorFor(n.kind)"></ion-icon>
       <ion-label>
         <h2>{{ n.message }}</h2>
-        <p>{{ n.created_at }}</p>
+        <p>{{ fmtDate(n.created_at) }}</p>
       </ion-label>
     </ion-item>
 
-    <ion-item *ngIf="notifications.length === 0">
+    <ion-item *ngIf="notifications.length === 0 && !loadingList && !loadError">
       <ion-label class="ion-text-center">
         Aún no hay notificaciones. Cuando un producto baje de precio o aparezca
         una oferta, se registrará aquí.

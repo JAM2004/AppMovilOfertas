@@ -23,6 +23,20 @@
     </ion-item>
   </ion-list>
 
+  <ion-item *ngIf="loadingList">
+    <ion-spinner slot="start" name="crescent"></ion-spinner>
+    <ion-label>Cargando productos...</ion-label>
+  </ion-item>
+
+  <ion-item *ngIf="loadError">
+    <ion-icon slot="start" name="cloud-offline-outline" color="danger"></ion-icon>
+    <ion-label>
+      <h2>{{ loadError }}</h2>
+      <p>Revisa que el servidor esté encendido.</p>
+    </ion-label>
+    <ion-button slot="end" fill="clear" (click)="load()">Reintentar</ion-button>
+  </ion-item>
+
   <!-- Lista de productos que estás monitoreando -->
   <ion-list>
     <ion-item *ngFor="let p of products">
@@ -35,7 +49,8 @@
       <ion-label>
         <h2>{{ p.title }}</h2>
         <p>
-          <ion-badge [style.background]="storeConfig[p.store]?.color" [style.color]="'#ffffff'"> {{ storeConfig[p.store]?.label }} </ion-badge>
+          <ion-badge [style.background]="storeConfig[p.store]?.color" [style.color]="'#ffffff'"> {{
+            storeConfig[p.store]?.label }} </ion-badge>
           <span *ngIf="p.discount_percent > 0" class="discount">
             -{{ p.discount_percent }}%
           </span>
@@ -54,7 +69,7 @@
       </ion-button>
     </ion-item>
 
-    <ion-item *ngIf="products.length === 0">
+    <ion-item *ngIf="products.length === 0 && !loadingList && !loadError">
       <ion-label class="ion-text-center">
         Agrega el link de un producto de Amazon o Steam para empezar a
         monitorearlo

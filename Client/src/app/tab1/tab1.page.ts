@@ -16,24 +16,24 @@ export class Tab1Page {
   url = '';
   loading = false;
 
-storeConfig: Record<string, {
-  color: string;
-  label: string;
-}> = {
+  storeConfig: Record<string, {
+    color: string;
+    label: string;
+  }> = {
 
-  amazon: {
-    // #FF9900 (naranja Amazon) con texto blanco falla contraste 4.5:1;
-    // usamos un ámbar más oscuro que conserva la identidad y cumple AA.
-    color: '#B45309',
-    label: 'Amazon'
-  },
+      amazon: {
+        // #FF9900 (naranja Amazon) con texto blanco falla contraste 4.5:1;
+        // usamos un ámbar más oscuro que conserva la identidad y cumple AA.
+        color: '#B45309',
+        label: 'Amazon'
+      },
 
-  steam: {
-    color: '#003c86',
-    label: 'Steam'
-  }
+      steam: {
+        color: '#003c86',
+        label: 'Steam'
+      }
 
-};
+    };
   constructor(
     private api: ApiService,
     private alertCtrl: AlertController
@@ -45,9 +45,24 @@ storeConfig: Record<string, {
     this.load();
   }
 
+loadError: string | null = null;
+  loadingList = true; // true inicial: el primer pintado ya muestra "cargando", no "vacío"
   load() {
-    this.api.getProducts().subscribe((p) => (this.products = p));
+    this.loadingList = true;
+    this.loadError = null;
+    this.api.getProducts().subscribe({
+      next: (p) => {
+        this.products = p;
+        this.loadingList = false;
+      },
+      error: () => {
+        this.loadError = 'No se pudo conectar con el servidor';
+        this.loadingList = false;
+      }
+    });
   }
+
+
 
   async addProduct() {
     if (!this.url.trim() || this.loading) return;
@@ -76,6 +91,7 @@ storeConfig: Record<string, {
       this.loading = false;
     }
   }
+
 
   async remove(p: Product) {
     await firstValueFrom(this.api.deleteProduct(p.id));
