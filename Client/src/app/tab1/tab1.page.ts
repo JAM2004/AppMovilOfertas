@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { AlertController } from '@ionic/angular';
 import { ApiService } from '../services/api.service';
 import { Product } from '../models/product';
+import { STORE_CONFIG, STORE_TEXT_CONTRAST } from '../store-config';
 
 @Component({
   selector: 'app-tab1',
@@ -16,24 +17,9 @@ export class Tab1Page {
   url = '';
   loading = false;
 
-  storeConfig: Record<string, {
-    color: string;
-    label: string;
-  }> = {
-
-      amazon: {
-        // #FF9900 (naranja Amazon) con texto blanco falla contraste 4.5:1;
-        // usamos un ámbar más oscuro que conserva la identidad y cumple AA.
-        color: '#B45309',
-        label: 'Amazon'
-      },
-
-      steam: {
-        color: '#003c86',
-        label: 'Steam'
-      }
-
-    };
+  storeConfig = STORE_CONFIG;
+  storeTextContrast = STORE_TEXT_CONTRAST; // Color del texto para contraste adecuado
+  
   constructor(
     private api: ApiService,
     private alertCtrl: AlertController

@@ -39,13 +39,13 @@
       <!-- Rejilla horizontal de precios -->
       <ng-container *ngFor="let g of gridH">
         <line [attr.x1]="padL" [attr.x2]="chartW - padR" [attr.y1]="g.y" [attr.y2]="g.y" stroke="rgba(125,125,125,0.22)" stroke-dasharray="3 3" />
-        <text [attr.x]="padL - 4" [attr.y]="g.y + 3" text-anchor="end" font-size="9" fill="#8a8a8a">{{ g.value }}</text>
+        <text [attr.x]="padL - 4" [attr.y]="g.y + 3" text-anchor="end" font-size="9" class="chart-axis">{{ g.value }}</text>
       </ng-container>
 
       <!-- Rejilla vertical de fechas -->
       <ng-container *ngFor="let g of gridV">
         <line [attr.x1]="g.x" [attr.x2]="g.x" [attr.y1]="padT" [attr.y2]="chartH - padB" stroke="rgba(125,125,125,0.15)" stroke-dasharray="3 3" />
-        <text [attr.x]="g.x" [attr.y]="chartH - padB + 14" text-anchor="middle" font-size="9" fill="#8a8a8a">{{ g.value }}</text>
+        <text [attr.x]="g.x" [attr.y]="chartH - padB + 14" text-anchor="middle" font-size="9" class="chart-axis">{{ g.value }}</text>
       </ng-container>
 
       <!-- Relleno y línea de la serie de precios -->
@@ -53,8 +53,7 @@
       <polyline
         [attr.points]="linePoints"
         fill="none"
-        stroke="#059669"
-        stroke-width="2"
+        class="chart-series"
         stroke-linejoin="round"
         stroke-linecap="round"
       />
@@ -72,8 +71,7 @@
         [attr.cy]="d.y"
         r="3"
         [attr.fill]="d.color"
-        stroke="#fff"
-        stroke-width="0.8"
+        class="chart-dot"
       >
         <title>{{ d.title }}</title>
       </circle>

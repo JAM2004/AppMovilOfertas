@@ -59,7 +59,7 @@
       <ion-label>
         <h2>{{ r.title }}</h2>
         <p>
-          <ion-badge [style.background]="storeConfig[r.store]?.color" [style.color]="'#ffffff'"> {{
+          <ion-badge [style.background]="storeConfig[r.store]?.color" [style.color]="storeTextContrast"> {{
             storeConfig[r.store]?.label }} </ion-badge>
           <span *ngIf="r.discount_percent > 0" class="discount">
             -{{ r.discount_percent }}%

@@ -41,11 +41,22 @@
 }
 
 /* Swatches de la leyenda: mismos tonos que los puntos de la serie. */
-.chart-legend .swatch-down { background: #16a34a; }
-.chart-legend .swatch-up { background: #dc2626; }
-.chart-legend .swatch-flat { background: #94a3b8; }
+.chart-legend .swatch-down { background: var(--ion-color-success); }
+.chart-legend .swatch-up { background: var(--ion-color-danger); }
+.chart-legend .swatch-flat { background: #94a3b8; } /* sin token: espejo de FLAT en tab2.page.ts */
 
 .chart-legend .marker-line {
-  color: #8a8a8a;
+  color: var(--ion-color-medium);
   font-size: 0.7rem;
 }
+
+/* Colores fijos del SVG con vars (los atributos stroke/fill no aceptan var()). */
+.chart-series {
+stroke: var(--ion-color-primary);
+stroke-width: 2;
+}
+.chart-dot {
+  stroke: var(--ion-card-background);
+  stroke-width: 0.8;
+}
+.chart-axis { fill: var(--ion-color-medium); }

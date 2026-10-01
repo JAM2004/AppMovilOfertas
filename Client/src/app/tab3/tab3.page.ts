@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { AlertController, ToastController } from '@ionic/angular';
 import { ApiService } from '../services/api.service';
 import { Recommendation } from '../models/product';
+import { STORE_CONFIG, STORE_TEXT_CONTRAST } from '../store-config';
 
 @Component({
   selector: 'app-tab3',
@@ -15,19 +16,8 @@ export class Tab3Page {
   reason: string | null = null;
   loading = false;
 
-  storeConfig: Record<string, {
-    color: string;
-    label: string;
-  }> = {
-    amazon: {
-      color: '#B45309',
-      label: 'Amazon',
-    },
-    steam: {
-      color: '#003c86',
-      label: 'Steam',
-    },
-  };
+  storeConfig = STORE_CONFIG;
+  storeTextContrast = STORE_TEXT_CONTRAST; // Color del texto para contraste adecuado
 
   constructor(
     private api: ApiService,

@@ -34,10 +34,10 @@ interface GridCol {
 
 // Colores de la paleta del design system (esmeralda/slate). Los tonos se
 // eligen con contraste suficiente sobre fondo claro y oscuro.
-const DOWN = '#16A34A'; // bajó de precio
-const UP = '#DC2626'; // subió de precio
-const FLAT = '#94A3B8';
-const GRID = 'rgba(100,116,139,0.22)';
+const DOWN = '#16a34a'; // = --ion-color-success: bajó de precio
+const UP = '#dc2626'; // = --ion-color-danger: subió de precio
+const FLAT = '#94a3b8';  // slate-400, sin token equivalente: punto neutro sobre fondo claro
+const GRID = 'rgba(100,116,139,0.22)'; // = --ion-color-medium-rgb con alfa: rejilla
 
 // Área dibujable del SVG (coordenadas abstractas, se escala con viewBox).
 const W = 340;
@@ -221,7 +221,7 @@ export class Tab2Page {
   markerColor(kind: string): string {
     switch (kind) {
       case 'price_drop': return DOWN; // bajada de precio
-      case 'discount': return '#D97706'; // ámbar: descuento
+      case 'discount': return '#d97706'; // = --ion-color-tertiary
       default: return GRID;
     }
   }
