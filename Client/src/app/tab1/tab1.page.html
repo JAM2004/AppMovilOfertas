@@ -43,11 +43,11 @@
       <ion-thumbnail slot="start">
         <img [src]="p.image" *ngIf="p.image; else noimg" />
         <ng-template #noimg>
-          <ion-icon name="image-outline" size="large"></ion-icon>
+          <ion-icon name="image-outline" size="small"></ion-icon>
         </ng-template>
       </ion-thumbnail>
       <ion-label>
-        <h2>{{ p.title }}</h2>
+        <h2 class="product-title" [attr.title]="p.title">{{ p.title }}</h2>
         <p>
           <ion-badge [style.background]="storeConfig[p.store]?.color" [style.color]="storeTextContrast"> {{
             storeConfig[p.store]?.label }} </ion-badge>

@@ -1,4 +1,4 @@
-package io.ionic.demo.pg.cap.ng;
+package com.antonio.ofertas;
 
 import com.getcapacitor.BridgeActivity;
 

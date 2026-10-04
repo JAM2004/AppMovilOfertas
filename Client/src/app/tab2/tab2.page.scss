@@ -60,3 +60,10 @@ stroke-width: 2;
   stroke-width: 0.8;
 }
 .chart-axis { fill: var(--ion-color-medium); }
+
+.product-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 8ch;
+}

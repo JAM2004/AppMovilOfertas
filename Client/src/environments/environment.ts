@@ -3,8 +3,6 @@
 
 export const environment = {
   production: false,
-  // URL del servidor de ofertas. En desarrollo web apunta a localhost.
-  // OJO: al correr la app en un teléfono real (Capacitor) esto debe apuntar
-  // a la IP de tu PC en la red local (ej: http://192.168.1.10:3000).
-  apiUrl: 'http://localhost:3000',
+// API en la red local (también sirve para probar desde el teléfono con ng serve)
+  apiUrl: 'http://192.168.100.4:3000',
 };
