@@ -31,6 +31,11 @@ Client/.angular/
 # Client/android/
 # Client/ios/
 
+# Firebase: google-services.json identifica tu app ante FCM. El build de
+# Android lo exige, pero NO se sube al repo: se descarga de la consola
+# (Project settings → Your apps) a Client/android/app/.
+Client/android/app/google-services.json
+
 # IDE / OS
 .idea/
 .vscode/

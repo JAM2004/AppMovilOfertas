@@ -6,7 +6,9 @@ import {
   addPricePoint,
   updateProductPrices,
   addNotification,
+  listDeviceTokens,
 } from "./db.js";
+import { sendPush } from "./push.js";
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -72,6 +74,15 @@ async function checkProduct(product) {
   for (const a of alerts) {
     addNotification({ productId: product.id, kind: a.kind, message: a.message });
     console.log(`[monitor] notificación: ${a.kind} -> ${a.message}`);
+  }
+  if (alerts.length > 0) {
+    try {
+      const tokens = listDeviceTokens().map((t) => t.token);
+      const title = alerts.length > 1 ? `${alerts.length} alertas de ofertas` : "Alerta de oferta";
+      await sendPush(tokens, { title, body: alerts.map((a) => a.message).join("\n") });
+    } catch (err) {
+      console.error("[monitor] fallo al enviar push (no critico):", err.message);
+    }
   }
   return alerts.length;
 }

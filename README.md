@@ -94,9 +94,8 @@ IP local del PC, ej. `http://192.168.1.10:3000`.
 - ✅ Fase 2: monitoreo de precios por cron con dedupe de alertas
   (bajada de precio y % de descuento)
 - ✅ Fase 4 (backend + UI): recomendaciones por embeddings locales
-- ⏳ Fase 5: notificaciones push (FCM) — pendiente
-- ⏳ Fase 0/1/2 (pulido): design system, estados de carga/vacío y
-  config de dispositivo real (`capacitor.config.ts` aún con valores del
-  starter, `apiUrl` en localhost)
+- ✅ Push FCM: alertas al teléfono (`firebase-admin` v14 + plugin Capacitor)
+- ✅ Pulido UI, design system centralizado y app instalada en el teléfono
+- ⏳ (Opcional) Tienda nueva: parser + extractor + registro en `src/stores/index.js`
 
 > Nota: este README es la referencia del estado actual..

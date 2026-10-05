@@ -22,7 +22,7 @@
       <ion-select-option
         *ngFor="let p of products"
         [value]="p.id"
-      > {{ p.title.length > 20 ? p.title | slice:0:20 + '...' : p.title }}</ion-select-option>
+      > {{ p.title.length > 20 ? (p.title | slice:0:20) + '...' : p.title }}</ion-select-option>
     </ion-select>
   </ion-item>
 

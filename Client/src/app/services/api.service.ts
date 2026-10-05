@@ -69,4 +69,11 @@ export class ApiService {
       { cookie }
     );
   }
+
+  registerDeviceToken(token: string): Observable<{ ok: boolean }> {
+    return this.http.post<{ ok: boolean }>(
+      `${this.base}/api/device-token`,
+      { token }
+    );
+  }
 }
