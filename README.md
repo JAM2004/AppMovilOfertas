@@ -96,6 +96,7 @@ IP local del PC, ej. `http://192.168.1.10:3000`.
 - ✅ Fase 4 (backend + UI): recomendaciones por embeddings locales
 - ✅ Push FCM: alertas al teléfono (`firebase-admin` v14 + plugin Capacitor)
 - ✅ Pulido UI, design system centralizado y app instalada en el teléfono
+- ✅ Acceso remoto vía Tailscale (la app funciona fuera de casa)
 - ⏳ (Opcional) Tienda nueva: parser + extractor + registro en `src/stores/index.js`
 
 > Nota: este README es la referencia del estado actual..

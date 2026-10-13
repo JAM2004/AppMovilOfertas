@@ -7,19 +7,24 @@ import {
   AppNotification,
 } from '../models/product';
 
+interface ChartLabel {
+  x: number;
+  y: number;
+  value: string;
+}
+// Tramo entre dos mediciones consecutivas, coloreado por dirección.
+interface ChartSegment {
+  points: string; // "x1,y1 x2,y2"
+  color: string;
+  title: string; // tooltip: dirección + precio + fecha
+}
+
 // Punto ya geolocalizado dentro del área útil del SVG.
 interface Dot {
   x: number;
   y: number;
   color: string; // verde=bajó, rojo=subió, gris=igual
   title: string;
-}
-
-// Línea vertical que marca un evento de notificación sobre la gráfica.
-interface Marker {
-  x: number;
-  color: string;
-  label: string;
 }
 
 interface GridLine {
@@ -32,18 +37,16 @@ interface GridCol {
   value: string;
 }
 
-// Colores de la paleta del design system (esmeralda/slate). Los tonos se
+// Colores de la paleta del design system (marca azul + slate). Los tonos se
 // eligen con contraste suficiente sobre fondo claro y oscuro.
 const DOWN = '#16a34a'; // = --ion-color-success: bajó de precio
 const UP = '#dc2626'; // = --ion-color-danger: subió de precio
 const FLAT = '#94a3b8';  // slate-400, sin token equivalente: punto neutro sobre fondo claro
-const GRID = 'rgba(100,116,139,0.22)'; // = --ion-color-medium-rgb con alfa: rejilla
-
 // Área dibujable del SVG (coordenadas abstractas, se escala con viewBox).
 const W = 340;
 const H = 210;
-const PAD_L = 48;
-const PAD_R = 12;
+const PAD_L = 62;
+const PAD_R = 10;
 const PAD_T = 12;
 const PAD_B = 28;
 
@@ -56,6 +59,9 @@ const PAD_B = 28;
 export class Tab2Page {
   products: Product[] = [];
   selectedId: number | null = null;
+  segments: ChartSegment[] = [];
+  minLabel: ChartLabel | null = null;
+  maxLabel: ChartLabel | null = null;
 
   detail: ProductDetail | null = null;
   // Notificaciones del producto seleccionado (reutilizadas para marcar la gráfica).
@@ -72,10 +78,8 @@ export class Tab2Page {
   padB = PAD_B;
 
   viewBox = `0 0 ${W} ${H}`;
-  linePoints = '';
   areaPoints = '';
   dots: Dot[] = [];
-  markers: Marker[] = [];
   gridH: GridLine[] = [];
   gridV: GridCol[] = [];
   hasData = false;
@@ -109,8 +113,8 @@ export class Tab2Page {
     if (this.selectedId == null) return;
     this.loading = true;
     try {
-      // Detalle con historial de precios + notificaciones para reusar los
-      // eventos de cambio de precio como marcadores sobre la gráfica.
+      // Detalle con historial de precios + notificaciones (estas últimas
+      // alimentan la lista "Cambios detectados" bajo la gráfica).
       const [detail, notes] = await Promise.all([
         firstValueFrom(this.api.getProductDetail(this.selectedId)),
         firstValueFrom(this.api.getNotifications()),
@@ -123,11 +127,29 @@ export class Tab2Page {
     }
   }
 
+  // Fecha+hora local para tooltips. Mismo fix UTC que fmtNoteDate.
+  fmtDateTime(iso: string): string {
+    const d = new Date(iso.replace(' ', 'T') + 'Z');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  }
+
+  // Eje X compacto ("02/10"): año y hora viven en tooltips y en la lista.
+  // Se conserva el fix UTC para no mover el día en el borde de medianoche.
+  fmtAxisDate(iso: string): string {
+    const d = new Date(iso.replace(' ', 'T') + 'Z');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${dd}/${mm}`;
+  }
+
   private buildChart() {
     const hist = this.detail?.history ?? [];
-    // Ordenamos por fecha por si acaso, y descartamos puntos sin precio.
-    const pts = hist
-      .filter((h) => h.price != null)
+    const pts = hist.filter((h) => h.price != null)
       .sort((a, b) => +new Date(a.checked_at) - +new Date(b.checked_at));
 
     if (pts.length < 2) {
@@ -139,8 +161,7 @@ export class Tab2Page {
     const innerW = W - PAD_L - PAD_R;
     const innerH = H - PAD_T - PAD_B;
 
-    // Dominios de tiempo y precio con un margen para que los puntos no toquen
-    // los bordes. Precio: si el mínimo == máximo se da un rango mínimo.
+    // Dominios con margen para que la línea no toque los bordes.
     const tMin = +new Date(pts[0].checked_at);
     const tMax = +new Date(pts[pts.length - 1].checked_at);
     const pMin = Math.min(...pts.map((p) => p.price));
@@ -154,16 +175,33 @@ export class Tab2Page {
     const yOf = (p: number) =>
       PAD_T + ((yMax - p) / (yMax - yMin)) * innerH;
 
-    // Generamos la polilínea de la serie y los puntos, coloreados según si el
-    // precio bajó/subió respecto del punto anterior (señal "disminuyó/aumentó").
     const coords = pts.map((pt) => `${xOf(+new Date(pt.checked_at)).toFixed(1)},${yOf(pt.price).toFixed(1)}`);
-    this.linePoints = coords.join(' ');
-    // Relleno degradado bajo la serie: cierra la polilínea contra la base del
-    // área útil, lo que hace más visible la tendencia a simple vista.
+    // Segmentos: cada par consecutivo se pinta según su dirección.
+    this.segments = pts.slice(1).map((pt, i) => {
+      const prev = pts[i];
+      let color = FLAT;
+      let dir = 'igual';
+      if (pt.price < prev.price) { color = DOWN; dir = 'bajó'; }
+      else if (pt.price > prev.price) { color = UP; dir = 'subió'; }
+      return {
+        points: `${coords[i]} ${coords[i + 1]}`,
+        color,
+        title: `${dir}: ${this.fmtPrice(pt.price)} (${this.fmtDateTime(pt.checked_at)})`,
+      };
+    });
+
+    // Área neutra (ya no verde: la línea multicolor no se sesga).
     const xFirst = xOf(tMin);
     const xLast = xOf(tMax);
-    this.areaPoints = `${this.linePoints} ${xLast.toFixed(1)},${H - PAD_B} ${xFirst.toFixed(1)},${H - PAD_B}`;
+    this.areaPoints = `${coords.join(' ')} ${xLast.toFixed(1)},${H - PAD_B} ${xFirst.toFixed(1)},${H - PAD_B}`;
+    // Extremos etiquetados (en táctil no hay hover: min/max visibles siempre).
+    const prices = pts.map((p) => p.price);
+    const iMin = prices.indexOf(Math.min(...prices));
+    const iMax = prices.indexOf(Math.max(...prices));
+    this.minLabel = { x: xOf(+new Date(pts[iMin].checked_at)), y: yOf(pts[iMin].price), value: this.fmtPrice(pts[iMin].price) };
+    this.maxLabel = iMax === iMin ? null : { x: xOf(+new Date(pts[iMax].checked_at)), y: yOf(pts[iMax].price), value: this.fmtPrice(pts[iMax].price) };
 
+    // Puntos solo donde hubo cambio (los grises de cada pasada del cron saturaban).
     this.dots = pts.map((p, i) => {
       const prev = pts[i - 1];
       let color = FLAT;
@@ -178,32 +216,33 @@ export class Tab2Page {
         x: xOf(+new Date(p.checked_at)),
         y: yOf(p.price),
         color,
-        title: `${title}: ${p.price} (${this.fmtDate(p.checked_at)})`,
+        title: `${title}: ${this.fmtPrice(p.price)} (${this.fmtDateTime(p.checked_at)})`,
       };
-    });
+    }).filter((d) => d.color !== FLAT); // fuera grises: solo cambios llevan punto
 
-    // Notificaciones del producto como líneas verticales sobre la gráfica.
-    // Cada tipo de evento tiene su color para que se lea de un vistazo.
-    this.markers = this.notes
-      .filter((n) => n.kind !== 'recommendation')
-      .map((n) => {
-        const t = +new Date(n.created_at);
-        return {
-          x: xOf(t),
-          color: this.markerColor(n.kind),
-          label: this.markerLabel(n.kind),
-        };
-      });
-
-    // Ejes de referencia: 4 líneas horizontales de precio y 4 verticales de fecha.
-    this.gridH = Array.from({ length: 4 }, (_, i) => {
-      const pv = yMin + ((yMax - yMin) * i) / 3;
+    // Ejes con valores REALES (nada interpolado: cada etiqueta es una medición).
+    const uniq = [...new Set(pts.map((p) => p.price))].sort((a, b) => a - b);
+    const atPrice = (f: number) => uniq[Math.min(uniq.length - 1, Math.floor(f * (uniq.length - 1)))];
+    this.gridH = [0, 0.33, 0.66, 1].map((f) => {
+      const pv = atPrice(f);
       return { y: yOf(pv), value: this.fmtPrice(pv) };
     });
-    this.gridV = Array.from({ length: 4 }, (_, i) => {
-      const t = tMin + ((tMax - tMin) * i) / 3;
-      return { x: xOf(t), value: this.fmtDate(new Date(t)) };
-    });
+    const atTime = (f: number) => pts[Math.min(pts.length - 1, Math.floor(f * (pts.length - 1)))].checked_at;
+    // Solo etiquetas separadas ≥44px (ancho de "02/10" + aire): las amontonadas
+    // se caen solas. Se compara contra la última aceptada, no la anterior.
+    const keptX: number[] = [];
+    this.gridV = [0, 0.33, 0.66, 1]
+      .map((f) => {
+        const t = atTime(f);
+        return { x: xOf(+new Date(t)), value: this.fmtAxisDate(t) };
+      })
+      .filter((g) => {
+        if (keptX.length === 0 || g.x - keptX[keptX.length - 1] >= 44) {
+          keptX.push(g.x);
+          return true;
+        }
+        return false;
+      });
 
     // Resumen: variación del primer al último precio.
     const first = pts[0].price;
@@ -215,23 +254,6 @@ export class Tab2Page {
       pct,
       dir: pct < -0.0001 ? 'down' : pct > 0.0001 ? 'up' : 'flat',
     };
-  }
-
-  // Color/etiqueta según el tipo de evento de precio reutilizado.
-  markerColor(kind: string): string {
-    switch (kind) {
-      case 'price_drop': return DOWN; // bajada de precio
-      case 'discount': return '#d97706'; // = --ion-color-tertiary
-      default: return GRID;
-    }
-  }
-
-  markerLabel(kind: string): string {
-    switch (kind) {
-      case 'price_drop': return 'bajada';
-      case 'discount': return 'descuento';
-      default: return 'evento';
-    }
   }
 
   // Icono de notificación (misma semántica que la pestaña Notificaciones).
@@ -273,14 +295,7 @@ export class Tab2Page {
     return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   }
 
-  fmtDate(d: Date | string): string {
-    const x = d instanceof Date ? d : new Date(d);
-    const dd = String(x.getDate()).padStart(2, '0');
-    const mm = String(x.getMonth() + 1).padStart(2, '0');
-    return `${dd}/${mm}`;
-  }
-
   fmtPrice(n: number): string {
-    return `$${n.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
+    return `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 }

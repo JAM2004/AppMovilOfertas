@@ -36,35 +36,33 @@
     </div>
 
     <svg [attr.viewBox]="viewBox" class="chart" preserveAspectRatio="none">
-      <!-- Rejilla horizontal de precios -->
+      <!-- Rejilla con valores reales (cada etiqueta es una medición, nada interpolado) -->
       <ng-container *ngFor="let g of gridH">
         <line [attr.x1]="padL" [attr.x2]="chartW - padR" [attr.y1]="g.y" [attr.y2]="g.y" stroke="rgba(125,125,125,0.22)" stroke-dasharray="3 3" />
         <text [attr.x]="padL - 4" [attr.y]="g.y + 3" text-anchor="end" font-size="9" class="chart-axis">{{ g.value }}</text>
       </ng-container>
-
-      <!-- Rejilla vertical de fechas -->
       <ng-container *ngFor="let g of gridV">
         <line [attr.x1]="g.x" [attr.x2]="g.x" [attr.y1]="padT" [attr.y2]="chartH - padB" stroke="rgba(125,125,125,0.15)" stroke-dasharray="3 3" />
         <text [attr.x]="g.x" [attr.y]="chartH - padB + 14" text-anchor="middle" font-size="9" class="chart-axis">{{ g.value }}</text>
       </ng-container>
 
-      <!-- Relleno y línea de la serie de precios -->
-      <polygon [attr.points]="areaPoints" fill="rgba(5,150,105,0.15)" />
+      <polygon [attr.points]="areaPoints" fill="rgba(100,116,139,0.12)" />
       <polyline
-        [attr.points]="linePoints"
+      *ngFor="let s of segments"
+        [attr.points]="s.points"
         fill="none"
-        class="chart-series"
+        [attr.stroke]="s.color"
+        stroke-width="2"
         stroke-linejoin="round"
         stroke-linecap="round"
-      />
+      >
+      <title>{{s.title}}</title>
+      </polyline>
 
-      <!-- Eventos de precio (reutiliza las notificaciones del cambio) -->
-      <ng-container *ngFor="let m of markers">
-        <line [attr.x1]="m.x" [attr.x2]="m.x" [attr.y1]="padT" [attr.y2]="chartH - padB" [attr.stroke]="m.color" stroke-width="1.5" stroke-dasharray="4 2" />
-        <text [attr.x]="m.x" [attr.y]="padT + 9" text-anchor="middle" font-size="8" [attr.fill]="m.color">{{ m.label }}</text>
-      </ng-container>
+      <text *ngIf="minLabel" [attr.x]="minLabel.x" [attr.y]="minLabel.y - 6" text-anchor="middle" font-size="9" fill="#16a34a">{{ minLabel.value }}</text>
+      <text *ngIf="maxLabel" [attr.x]="maxLabel.x" [attr.y]="maxLabel.y - 6" text-anchor="middle" font-size="9" fill="#dc2626">{{ maxLabel.value }}</text>
 
-      <!-- Puntos: verde si bajó, rojo si subió, gris si quedó igual -->
+      <!-- Puntos por medición: verde si bajó, rojo si subió, gris si quedó igual -->
       <circle
         *ngFor="let d of dots"
         [attr.cx]="d.x"
@@ -75,13 +73,13 @@
       >
         <title>{{ d.title }}</title>
       </circle>
+
     </svg>
 
     <div class="chart-legend">
       <span><i class="swatch swatch-down"></i> bajó</span>
       <span><i class="swatch swatch-up"></i> subió</span>
       <span><i class="swatch swatch-flat"></i> igual</span>
-      <span class="marker-line">│ evento (bajada/descuento)</span>
     </div>
   </div>
 

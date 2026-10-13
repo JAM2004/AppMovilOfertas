@@ -17,6 +17,13 @@
   height: 220px;
 }
 
+/* Contorno de los puntos (los atributos SVG no aceptan var()). */
+.chart-dot {
+  stroke: var(--ion-card-background);
+  stroke-width: 0.8;
+}
+.chart-axis { fill: var(--ion-color-medium); }
+
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -44,26 +51,3 @@
 .chart-legend .swatch-down { background: var(--ion-color-success); }
 .chart-legend .swatch-up { background: var(--ion-color-danger); }
 .chart-legend .swatch-flat { background: #94a3b8; } /* sin token: espejo de FLAT en tab2.page.ts */
-
-.chart-legend .marker-line {
-  color: var(--ion-color-medium);
-  font-size: 0.7rem;
-}
-
-/* Colores fijos del SVG con vars (los atributos stroke/fill no aceptan var()). */
-.chart-series {
-stroke: var(--ion-color-primary);
-stroke-width: 2;
-}
-.chart-dot {
-  stroke: var(--ion-card-background);
-  stroke-width: 0.8;
-}
-.chart-axis { fill: var(--ion-color-medium); }
-
-.product-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 8ch;
-}

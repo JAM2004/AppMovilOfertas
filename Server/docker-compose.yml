@@ -1,0 +1,18 @@
+# Uso (desde Server/):  docker compose up -d --build
+# Logs:                 docker compose logs -f
+# Respaldo BD:          copiar Server/data/ (igual que sin Docker).
+#
+# Reglas:
+# - La BD persiste en ./data (volumen). Sin esto, recrear = perder todo.
+# - El .env NUNCA entra a la imagen: llega por env_file (secretos por máquina).
+# - Ollama queda FUERA del contenedor; apuntar OLLAMA_URL al host según caso.
+# - El cron del monitor corre dentro sin cambios (node-cron).
+services:
+  ofertas:
+    build: .
+    env_file: .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/srv/data
+    restart: unless-stopped
