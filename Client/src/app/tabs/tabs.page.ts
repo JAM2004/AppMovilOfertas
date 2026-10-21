@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ConnectionService } from '../connection.service';
 
 @Component({
   selector: 'app-tabs',
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class TabsPage {
+  online$ = this.conn.isOnline$;
 
-  constructor() {}
-
+  constructor(private conn: ConnectionService) {}
 }

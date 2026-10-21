@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
+import { filter, takeUntil, timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ConnectionService } from '../connection.service';
 import {
   Product,
   AppNotification,
@@ -17,7 +19,7 @@ import {
 export class ApiService {
   private base = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private conn: ConnectionService) {}
 
   // Registra un producto a partir del link compartido; el servidor detecta la
   // tienda y raspea título/precio/descuento.
@@ -75,5 +77,21 @@ export class ApiService {
       `${this.base}/api/device-token`,
       { token }
     );
+  }
+
+  async cached<T>(key: string, fetch: () => Observable<T>): Promise<T> {
+    const raw = localStorage.getItem(key);
+    const local = raw ? JSON.parse(raw) : null;
+
+    try {
+      const fresh = await firstValueFrom(fetch().pipe(timeout(4000)));
+      this.conn.setOnline(true);
+      localStorage.setItem(key, JSON.stringify(fresh));
+      return fresh;
+    } catch (err: any) {
+      if (!err?.status) this.conn.setOnline(false);
+      if (local) return local;
+      throw new Error('No hay datos en caché y la petición falló: ' + err);
+    }
   }
 }

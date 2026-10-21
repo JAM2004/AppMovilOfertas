@@ -33,17 +33,10 @@ loadError: string | null = null;
   load() {
     this.loadError = null;
     this.loadingList = true;
-    this.api.getRecommendations(20).subscribe({
-      next: (res) => {
-        this.items = res.items;
-        this.reason = res.reason;
-        this.loadingList = false;
-      },
-      error: () => {
-        this.loadError = 'No se pudo conectar con el servidor';
-        this.loadingList = false;
-      }
-    });
+    this.api.cached('recommendations', () => this.api.getRecommendations(20))
+    .then((res) => { this.items = res.items = res.items; this.reason = res.reason; })
+    .catch(() => { this.loadError = 'No se pudo conectar con el servidor'; })
+    .finally(() => { this.loadingList = false; });
   }
 
   // Refresca el motor: embebe tus productos y trae ofertas nuevas. Puede

@@ -30,9 +30,8 @@ export class Tab5Page {
   load() {
     // La API no expone la cookie guardada (solo si existe y cuándo se renovó),
     // así el input siempre sale vacío y solo mostramos el estado de cada tienda.
-    this.api.getStoreSettings().subscribe((s) => {
-      this.settings = s;
-    });
+    this.api.cached('storeSettings', () => this.api.getStoreSettings())
+    .then((s) => { this.settings = s;});
   }
 
   save(store: StoreSetting) {

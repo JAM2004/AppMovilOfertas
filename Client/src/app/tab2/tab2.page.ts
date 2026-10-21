@@ -95,12 +95,12 @@ export class Tab2Page {
   }
 
   async loadProducts() {
-    // Cargamos todos los productos (want ): cualquiera puede tener
-    // historial de precios si estuvo en monitoreo.
-    this.products = await firstValueFrom(this.api.getProducts());
-    if (!this.selectedId && this.products.length > 0) {
-      this.selectedId = this.products[0].id;
+    try {
+      this.products = await this.api.cached('products', () => this.api.getProducts());
+    } catch {
+      this.products = []; // Ignorar error: la lista de productos puede estar vacía.
     }
+    if (!this.selectedId && this.products.length > 0) this.selectedId = this.products[0].id;
     if (this.selectedId != null) this.selectProduct(this.selectedId);
   }
 
@@ -111,13 +111,14 @@ export class Tab2Page {
 
   async loadChart() {
     if (this.selectedId == null) return;
+    const id = this.selectedId;
     this.loading = true;
     try {
       // Detalle con historial de precios + notificaciones (estas últimas
       // alimentan la lista "Cambios detectados" bajo la gráfica).
       const [detail, notes] = await Promise.all([
-        firstValueFrom(this.api.getProductDetail(this.selectedId)),
-        firstValueFrom(this.api.getNotifications()),
+       this.api.cached(`detail-${this.selectedId}`, () => this.api.getProductDetail(id)),
+       this.api.cached(`notes-${this.selectedId}`, () => this.api.getNotifications()),
       ]);
       this.detail = detail;
       this.notes = notes.filter((n) => n.product_id === detail.id);

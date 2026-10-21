@@ -21,16 +21,10 @@ loadingList = true; // true inicial: el primer pintado ya muestra "cargando", no
 load() {
   this.loadError = null;
   this.loadingList = true;
-  this.api.getNotifications().subscribe({
-    next: (n) => {
-      this.notifications = n;
-      this.loadingList = false;
-    },
-    error: () => {
-      this.loadError = 'No se pudo conectar con el servidor';
-      this.loadingList = false;
-    }
-  });
+  this.api.cached('notifications', () => this.api.getNotifications())
+  .then((n) => {this.notifications = n; })
+  .catch(() => {this.loadError = 'No se pudo conectar con el servidor'; })
+  .finally (() => {this.loadingList = false; });
 }
 
   // "2026-09-29 18:05:21" (UTC sin sufijo) → "29/09/2026 11:05" (hora local).

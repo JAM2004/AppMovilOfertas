@@ -33,19 +33,17 @@ export class Tab1Page {
 
 loadError: string | null = null;
   loadingList = true; // true inicial: el primer pintado ya muestra "cargando", no "vacío"
-  load() {
+  async load() {
     this.loadingList = true;
     this.loadError = null;
-    this.api.getProducts().subscribe({
-      next: (p) => {
-        this.products = p;
-        this.loadingList = false;
-      },
-      error: () => {
-        this.loadError = 'No se pudo conectar con el servidor';
-        this.loadingList = false;
-      }
-    });
+    try {
+      const data = await this.api.cached('products', () => this.api.getProducts());
+      this.products = data;
+    } catch { 
+        this.loadError = 'No se pudo conectar con el servidor' }
+    finally {
+      this.loadingList = false;
+    };
   }
 
 
